@@ -169,6 +169,16 @@ public class EchoSpheres : MonoBehaviour
 			es.Update();
 		}
 
+		if (Input.GetKeyDown (KeyCode.Space))
+		{
+			Debug.Log("Triggering pulse["+CurrentSphere.ToString()+"]");
+			Spheres[CurrentSphere].TriggerPulse();
+			Spheres[CurrentSphere].Position = transform.position;
+
+			CurrentSphere += 1;
+			if(CurrentSphere >= Spheres.Count)CurrentSphere = 0;
+		}
+
 		UpdateRayCast();
 	}
 
