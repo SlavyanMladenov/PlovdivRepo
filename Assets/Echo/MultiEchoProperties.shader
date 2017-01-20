@@ -4,7 +4,7 @@ Shader "Custom/Echo/MultipleUsingProperty" {
 		_EchoTex ("Echo (RGBA)", 2D) = "white" {}
 		_MainColor ("Main Color",Color) = (1.0,1.0,1.0,1.0)	
 		_DistanceFade("Distance Fade",float) = 1.0
-		_MinRadius("MinRadius",float) = 1.0
+		_WaveLenght("WaveLenght",float) = 1.0
 		_MaxRadius("MaxRadius",float) = 1.0
 		_MaxFade("MaxFade",float) = 1.0
 		
@@ -46,7 +46,7 @@ Shader "Custom/Echo/MultipleUsingProperty" {
 		
 		float4 _MainColor;
 		float _DistanceFade;
-		float _MinRadius;
+		float _WaveLenght;
 		float _MaxRadius;
 		float _MaxFade;
 		
@@ -106,15 +106,20 @@ Shader "Custom/Echo/MultipleUsingProperty" {
 		// Custom surfacer that mimics an echo effect
 		void surf (Input IN, inout SurfaceOutput o)
 		{
-			float c1 = 0;
+			float c1 = 0.0;
 
 			// manually add more echos here.
 			c1 += ApplyFade(IN,_Position0,_Radius0,_Fade0);
+			c1 -= ApplyFade(IN,_Position0,_Radius0 - _WaveLenght,_Fade0);
 			c1 += ApplyFade(IN,_Position1,_Radius1,_Fade1);
+			c1 -= ApplyFade(IN,_Position1,_Radius1 - _WaveLenght,_Fade1);
 			c1 += ApplyFade(IN,_Position2,_Radius2,_Fade2);
+			c1 -= ApplyFade(IN,_Position2,_Radius2 - _WaveLenght,_Fade2);
 			c1 += ApplyFade(IN,_Position3,_Radius3,_Fade3);
+			c1 -= ApplyFade(IN,_Position3,_Radius3 - _WaveLenght,_Fade3);
 			c1 += ApplyFade(IN,_Position4,_Radius4,_Fade4);
-			c1 /= 5.0;
+			c1 -= ApplyFade(IN,_Position4,_Radius4 - _WaveLenght,_Fade4);
+			c1 *= 0.8;
 
 			float c2 = 1.0 - c1;
 			o.Albedo = _MainColor.rgb * c2 + tex2D (_MainTex, IN.uv_MainTex).rgb * c1 ;		

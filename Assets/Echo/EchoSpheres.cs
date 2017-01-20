@@ -6,9 +6,6 @@ using System.Collections.Generic;
 [Serializable]
 public class EchoSphere2
 {
-	public enum ShaderPackingMode { Texture, Property };
-	public ShaderPackingMode CurrentPackingMode = ShaderPackingMode.Texture;
-	
 	public Texture2D EchoTexture;
 	public Material EchoMaterial = null;
 	public Vector3 Position;
@@ -17,7 +14,8 @@ public class EchoSphere2
 	// Echo sphere Properties
 	public float SphereMaxRadius = 10.0f;		//Final size of the echo sphere.
 	private float sphereCurrentRadius = 0.0f;	//Current size of the echo sphere
-	
+
+	public float WaveLenght = 2.0f;			//Lenght of the wave
 	public float FadeDelay = 0.0f;			//Time to delay before triggering fade.
 	public float FadeRate = 1.0f;			//Speed of the fade away
 	public float echoSpeed = 1.0f;			//Speed of the sphere growth.
@@ -39,9 +37,8 @@ public class EchoSphere2
 		// If manual selection is disabled, automatically trigger a pulse at the given freq.
 		deltaTime += Time.deltaTime;
 		UpdateEcho();
-		
-		if(CurrentPackingMode == ShaderPackingMode.Texture)UpdateTexture();
-		if(CurrentPackingMode == ShaderPackingMode.Property)UpdateProperties();
+
+		UpdateProperties();
 	}
 	
 	// Called to trigger an echo pulse
@@ -78,27 +75,11 @@ public class EchoSphere2
 		EchoMaterial.SetFloat("_Radius"+SphereIndex.ToString(),sphereCurrentRadius);
 		EchoMaterial.SetFloat("_Fade"+SphereIndex.ToString(),fade);
 
-		EchoMaterial.SetFloat("_MinRadius",5);
+		EchoMaterial.SetFloat("_WaveLenght",WaveLenght);
 		EchoMaterial.SetFloat("_MaxRadius",maxRadius);
 		EchoMaterial.SetFloat("_MaxFade",maxFade);
 	}
-	
-	void UpdateTexture()
-	{	
-		if(!is_animated)return;
-		float maxRadius = SphereMaxRadius;
-		float maxFade = SphereMaxRadius / echoSpeed;
-		
-		EchoTexture.SetPixel(SphereIndex,0,FloatPacking.ToColor(Position.x));
-		EchoTexture.SetPixel(SphereIndex,1,FloatPacking.ToColor(Position.y));
-		EchoTexture.SetPixel(SphereIndex,2,FloatPacking.ToColor(Position.z));
-		EchoTexture.SetPixel(SphereIndex,3,FloatPacking.ToColor(sphereCurrentRadius));
-		EchoTexture.SetPixel(SphereIndex,4,FloatPacking.ToColor(fade));
-		EchoTexture.Apply();	
-		
-		EchoMaterial.SetFloat("_MaxRadius",maxRadius);
-		EchoMaterial.SetFloat("_MaxFade",maxFade);
-	}
+
 	// Called to update the echo front edge
 	void UpdateEcho()
 	{
@@ -127,7 +108,6 @@ public class EchoSphere2
 }
 public class EchoSpheres : MonoBehaviour
 {
-	public EchoSphere2.ShaderPackingMode CurrentPackingMode = EchoSphere2.ShaderPackingMode.Texture;
 	public Texture2D EchoTexture;
 	public Material EchoMaterial = null;
 	
@@ -136,7 +116,8 @@ public class EchoSpheres : MonoBehaviour
 	
 	// Echo sphere Properties
 	public float SphereMaxRadius = 10.0f;		//Final size of the echo sphere.
-	
+
+	public float WaveLenght = 2.0f;			//Lenght of the wave
 	public float FadeDelay = 0.0f;			//Time to delay before triggering fade.
 	public float FadeRate = 1.0f;			//Speed of the fade away
 	public float echoSpeed = 1.0f;			//Speed of the sphere growth.
@@ -159,10 +140,10 @@ public class EchoSpheres : MonoBehaviour
 				EchoTexture = EchoTexture,
 				echoSpeed = echoSpeed,
 				SphereMaxRadius = SphereMaxRadius,
+				WaveLenght = WaveLenght,
 				FadeDelay = FadeDelay,
 				FadeRate = FadeRate,
 				SphereIndex = i,
-				CurrentPackingMode = CurrentPackingMode
 			};
 			Spheres.Add(es);
 		}
@@ -186,6 +167,16 @@ public class EchoSpheres : MonoBehaviour
 		foreach (EchoSphere2 es in Spheres)
 		{
 			es.Update();
+		}
+
+		if (Input.GetKeyDown (KeyCode.Space))
+		{
+			Debug.Log("Triggering pulse["+CurrentSphere.ToString()+"]");
+			Spheres[CurrentSphere].TriggerPulse();
+			Spheres[CurrentSphere].Position = transform.position;
+
+			CurrentSphere += 1;
+			if(CurrentSphere >= Spheres.Count)CurrentSphere = 0;
 		}
 
 		UpdateRayCast();
