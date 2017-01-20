@@ -1,0 +1,2 @@
+Unity VC Shader by defaxer:
+http://forum.unity3d.com/threads/standard-shader-with-vertex-colors.316529/
