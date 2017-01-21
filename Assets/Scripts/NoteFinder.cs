@@ -5,6 +5,7 @@ using System.Collections;
 public class NoteFinder : MonoBehaviour
 {
     public GameObject audioInputObject;
+    public EchoSpheres footStepsEcho;
 
     public float threshold = 1.0f;
     MicrophoneInput micIn;
@@ -23,10 +24,7 @@ public class NoteFinder : MonoBehaviour
 		int f = (int)micIn.frequency;// Get the frequency from our MicrophoneInput script
 		if (t>=0.8) // Compare the frequency to known value, take possible rounding error in to account
         {
-			audio.Play();
-
-
-            Debug.Log("WORKING!");
+            footStepsEcho.StartEcho(transform.position);
         }
         
     }
