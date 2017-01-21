@@ -12,7 +12,7 @@ public class NoteFinder : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        micIn = (MicrophoneInput)audioInputObject.GetComponent("MicrophoneInput");
+		micIn = audioInputObject.GetComponent<MicrophoneInput>();
     }
 
     // Update is called once per frame
@@ -24,6 +24,5 @@ public class NoteFinder : MonoBehaviour
         {
 			echoSpheres.StartEcho (transform.position);
         }
-        
     }
 }
