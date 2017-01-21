@@ -5,6 +5,8 @@ public class LookTouchWalk : MonoBehaviour
 {
 	public Transform VrCamera;
 	public AudioSource stepAudioSource;
+	public AudioClip footstepClip;
+	public EchoSpheres footStepsEcho;
 	public float stepGapDuration = 0.5f;
 	public float ToggleAngle = 30.0f;
 	public float speed = 3.0f;
@@ -22,7 +24,7 @@ public class LookTouchWalk : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Stationary || Input.GetKeyDown(KeyCode.W))
+		if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Stationary || Input.GetKey(KeyCode.W))
 		{
 			moveForward = true;
 		}
@@ -37,15 +39,19 @@ public class LookTouchWalk : MonoBehaviour
 			Vector3 forward = VrCamera.TransformDirection (Vector3.forward);
 			cc.SimpleMove (forward * speed);
 
-			if (stepTimer <= 0f)
-			{
-				stepAudioSource.Play ();
-			}
+			UpdateStep ();
+		}
+	}
 
+	void UpdateStep()
+	{
+		if (stepTimer <= 0f)
+		{
+			footStepsEcho.StartEcho (stepAudioSource.transform.position);
+			stepAudioSource.PlayOneShot(footstepClip);
 			stepTimer = stepGapDuration;
-
-
 		}
 
+		stepTimer -= Time.deltaTime;
 	}
 }
