@@ -32,7 +32,11 @@ public class EchoSphere2
 	// Update is called once per frame
 	public void Update ()
 	{
-		if(EchoMaterial == null)return;
+		if (EchoMaterial == null)
+		{
+			Debug.Log ("this one");
+			return;	
+		}
 		
 		// If manual selection is disabled, automatically trigger a pulse at the given freq.
 		deltaTime += Time.deltaTime;
@@ -53,7 +57,7 @@ public class EchoSphere2
 	// Called to halt an echo pulse.
 	void HaltPulse()
 	{
-		Debug.Log("HaltPulse reached");
+		//Debug.Log("HaltPulse reached");
 		is_animated = false;	
 	}
 	
@@ -109,7 +113,7 @@ public class EchoSphere2
 public class EchoSpheres : MonoBehaviour
 {
 	public Texture2D EchoTexture;
-	public Material EchoMaterial = null;
+	public List<Material> EchoMaterials = null;
 	
 	public int SphereCount = 1;
 	public int CurrentSphere = 0;
@@ -122,7 +126,7 @@ public class EchoSpheres : MonoBehaviour
 	public float FadeRate = 1.0f;			//Speed of the fade away
 	public float echoSpeed = 1.0f;			//Speed of the sphere growth.
 	
-	private List<EchoSphere2> Spheres = new List<EchoSphere2>();
+	private List<EchoSphere2[]> Spheres = new List<EchoSphere2[]>();
 		
 	// Use this for initialization
 	void Start ()
@@ -135,17 +139,22 @@ public class EchoSpheres : MonoBehaviour
 	{
 		for(int i = 0; i < SphereCount; i++)
 		{
-			EchoSphere2 es = new  EchoSphere2{
-				EchoMaterial = EchoMaterial,
-				EchoTexture = EchoTexture,
-				echoSpeed = echoSpeed,
-				SphereMaxRadius = SphereMaxRadius,
-				WaveLenght = WaveLenght,
-				FadeDelay = FadeDelay,
-				FadeRate = FadeRate,
-				SphereIndex = i,
-			};
-			Spheres.Add(es);
+			EchoSphere2[] spheres = new EchoSphere2[EchoMaterials.Count];
+			for (int j = 0, m = EchoMaterials.Count; j < m; j++)
+			{
+				spheres[j] = new  EchoSphere2 {
+					EchoMaterial = EchoMaterials[j],
+					EchoTexture = EchoTexture,
+					echoSpeed = echoSpeed,
+					SphereMaxRadius = SphereMaxRadius,
+					WaveLenght = WaveLenght,
+					FadeDelay = FadeDelay,
+					FadeRate = FadeRate,
+					SphereIndex = i,
+				};
+			}
+
+			Spheres.Add(spheres);
 		}
 	}
 	/// <summary>
@@ -153,33 +162,58 @@ public class EchoSpheres : MonoBehaviour
 	/// </summary>
 	void CreateEchoTexture()
 	{
-		EchoTexture = new Texture2D(128,128,TextureFormat.RGBA32,false);
-		EchoTexture.filterMode = FilterMode.Point;
-		EchoTexture.Apply();
+		for (int i = 0, n = EchoMaterials.Count; i < n; i++)
+		{
+			EchoTexture = new Texture2D (128, 128, TextureFormat.RGBA32, false);
+			EchoTexture.filterMode = FilterMode.Point;
+			EchoTexture.Apply ();
 		
-		EchoMaterial.SetTexture("_EchoTex",EchoTexture);
+			EchoMaterials[i].SetTexture ("_EchoTex", EchoTexture);
+		}
 	}
 	// Update is called once per frame
 	void Update ()
 	{
-		if(EchoMaterial == null)return;	
-
-		foreach (EchoSphere2 es in Spheres)
+		if (EchoMaterials == null)
 		{
-			es.Update();
+			return;	
+		}
+
+		foreach (EchoSphere2[] es in Spheres)
+		{
+			for (int i = 0, n = es.Length; i < n; i++)
+			{
+				es[i].Update();
+			}
 		}
 
 		if (Input.GetKeyDown (KeyCode.Space))
 		{
-			Debug.Log("Triggering pulse["+CurrentSphere.ToString()+"]");
-			Spheres[CurrentSphere].TriggerPulse();
-			Spheres[CurrentSphere].Position = transform.position;
+			//Debug.Log("Triggering pulse["+CurrentSphere.ToString()+"]");
+			TriggerPulse();
+			SetPositions(transform.position);
 
 			CurrentSphere += 1;
 			if(CurrentSphere >= Spheres.Count)CurrentSphere = 0;
 		}
 
 		UpdateRayCast();
+	}
+
+	void TriggerPulse()
+	{
+		for (int i = 0, n = Spheres [CurrentSphere].Length; i < n; i++)
+		{
+			Spheres[CurrentSphere][i].TriggerPulse();
+		}
+	}
+
+	void SetPositions(Vector3 pos)
+	{
+		for (int i = 0, n = Spheres [CurrentSphere].Length; i < n; i++)
+		{
+			Spheres[CurrentSphere][i].Position = pos;
+		}
 	}
 
 	// Called to manually place echo pulse
@@ -191,9 +225,9 @@ public class EchoSpheres : MonoBehaviour
 		  	RaycastHit hit;
 	        if (Physics.Raycast(ray,out hit, 10000))
 			{
-	            Debug.Log("Triggering pulse["+CurrentSphere.ToString()+"]");
-				Spheres[CurrentSphere].TriggerPulse();
-				Spheres[CurrentSphere].Position = hit.point;
+	            //Debug.Log("Triggering pulse["+CurrentSphere.ToString()+"]");
+				TriggerPulse();
+				SetPositions(hit.point);
 				
 				CurrentSphere += 1;
 				if(CurrentSphere >= Spheres.Count)CurrentSphere = 0;
