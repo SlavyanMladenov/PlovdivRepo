@@ -13,18 +13,24 @@ Shader "Custom/Echo/MultipleUsingProperty" {
 		_Position2("Position2",Vector) = (0.0,0.0,0.0)
 		_Position3("Position3",Vector) = (0.0,0.0,0.0)
 		_Position4("Position4",Vector) = (0.0,0.0,0.0)
+		_Position5("Position5",Vector) = (0.0,0.0,0.0)
+		_Position6("Position6",Vector) = (0.0,0.0,0.0)
 		
 		_Radius0("Radius0",float) = 0.0	
 		_Radius1("Radius1",float) = 0.0	
 		_Radius2("Radius2",float) = 0.0	
 		_Radius3("Radius3",float) = 0.0	
 		_Radius4("Radius4",float) = 0.0	
+		_Radius5("Radius5",float) = 0.0	
+		_Radius6("Radius6",float) = 0.0	
 		
 		_Fade0("Fade0",float) = 0.0
 		_Fade1("Fade1",float) = 0.0
 		_Fade2("Fade2",float) = 0.0
 		_Fade3("Fade3",float) = 0.0
 		_Fade4("Fade4",float) = 0.0
+		_Fade5("Fade5",float) = 0.0
+		_Fade6("Fade6",float) = 0.0
 	} 
 	
 	SubShader {
@@ -55,18 +61,24 @@ Shader "Custom/Echo/MultipleUsingProperty" {
 		float3 _Position2;
 		float3 _Position3;
 		float3 _Position4;
+		float3 _Position5;
+		float3 _Position6;
 		
 		float _Radius0;
 		float _Radius1;
 		float _Radius2;
 		float _Radius3;
 		float _Radius4;
+		float _Radius5;
+		float _Radius6;
 		
 		float _Fade0;
 		float _Fade1;
 		float _Fade2;
 		float _Fade3;
 		float _Fade4;
+		float _Fade5;
+		float _Fade6;
 
 
 		// Custom light model that ignores actual lighting. 
@@ -119,10 +131,14 @@ Shader "Custom/Echo/MultipleUsingProperty" {
 			c1 -= ApplyFade(IN,_Position3,_Radius3 - _WaveLenght,_Fade3);
 			c1 += ApplyFade(IN,_Position4,_Radius4,_Fade4);
 			c1 -= ApplyFade(IN,_Position4,_Radius4 - _WaveLenght,_Fade4);
-			c1 *= 0.8;
+			c1 += ApplyFade(IN,_Position5,_Radius5,_Fade5);
+			c1 -= ApplyFade(IN,_Position5,_Radius5 - _WaveLenght,_Fade5);
+			c1 += ApplyFade(IN,_Position6,_Radius6,_Fade6);
+			c1 -= ApplyFade(IN,_Position6,_Radius6 - _WaveLenght,_Fade6);
+			//c1 *= 0.8;
 
-			float c2 = 1.0 - c1;
-			o.Albedo = _MainColor.rgb * c2 + tex2D (_MainTex, IN.uv_MainTex).rgb * c1 ;		
+			//float c2 = 1.0 - c1;
+			o.Albedo = _MainColor.rgb /* * c2*/ + tex2D (_MainTex, IN.uv_MainTex).rgb * c1 ;		
 		}
 		ENDCG
 	} 
